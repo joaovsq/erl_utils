@@ -1,4 +1,4 @@
-erl_utils
+Erlang Utils
 =====
 
 Some useful functions
