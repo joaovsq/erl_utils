@@ -1,7 +1,6 @@
 -module(utils).
 
 -export([
-    start_attach_process/3,
     datetime_to_timestamp/1,
     string_format/2,
     get_legacy_rsa_ciphers/0,
@@ -134,14 +133,3 @@ emptyloop(RuleFunc, _) ->
     Result = RuleFunc(),
     emptyloop(RuleFunc, Result).
 
-%% Starts and dynamically attach a process to a generic supervisor
-start_attach_process(Module, Function, Args) ->
-    ChildSpec = #{
-        id => Module,
-        start => {Module, Function, Args},
-        restart => transient,
-        shutdown => brutal_kill,
-        type => worker,
-        modules => [Module]
-    },
-    supervisor:start_child(gen_worker_sup, ChildSpec).
