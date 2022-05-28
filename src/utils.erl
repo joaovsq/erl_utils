@@ -11,7 +11,8 @@
     float_to_string/2,
     int_to_string/1,
     string_to_float/1,
-    emptyloop/1
+    emptyloop/1,
+    reinit_mnesia_cluster/0
 ]).
 
 -export([bin_to_hex/1]).
@@ -133,3 +134,13 @@ emptyloop(RuleFunc, _) ->
     Result = RuleFunc(),
     emptyloop(RuleFunc, Result).
 
+%% @doc 
+%%  Erases all mnesia replicas and start it anew.
+%%  Use it only after the network partition has been resolved and all nodes are reachable.
+%% @end
+reinit_mnesia_cluster() ->
+    rpc:multicall(mnesia, stop, []),
+    AllNodes = [node() | nodes()],
+    mnesia:delete_schema(AllNodes),
+    mnesia:create_schema(AllNodes),
+    rpc:multicall(mnesia, start, []).
