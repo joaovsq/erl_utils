@@ -7,7 +7,7 @@
 %% Starts the env config. It creates the necessary cache tables.
 start() ->
     ets:new(
-        envcache,
+        ?MODULE,
         [
             set,
             public,
@@ -35,11 +35,11 @@ get_from_ets(TableName, Key) ->
 %% 2. OS Environment Variables.
 %% 3. A .env file in the local directory.
 get_var(Var) when is_atom(Var) ->
-    CacheResult = get_from_ets(envcache, Var),
+    CacheResult = get_from_ets(?MODULE, Var),
     case CacheResult of
         empty ->
             Result = var_from_env(Var),
-            ets:insert(envcache, {Var, Result}),
+            ets:insert(?MODULE, {Var, Result}),
             Result;
         _ ->
             CacheResult
@@ -52,7 +52,7 @@ var_from_env(Var) ->
     EnvVar = os:getenv(Var),
     case EnvVar of
         false ->
-            Lines = file_utils:read_all(".env"),
+            Lines = erl_utils_file:read_all(".env"),
             VarMap = lists:foldl(
                 fun get_key_value/2,
                 maps:new(),

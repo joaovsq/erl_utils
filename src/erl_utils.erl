@@ -134,7 +134,7 @@ emptyloop(RuleFunc, _) ->
     Result = RuleFunc(),
     emptyloop(RuleFunc, Result).
 
-%% @doc 
+%% @doc
 %%  Erases all mnesia replicas and start it anew.
 %%  Use it only after the network partition has been resolved and all nodes are reachable.
 %% @end
