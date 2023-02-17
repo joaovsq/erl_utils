@@ -1,6 +1,6 @@
 %% This module provides functionality to read Environment variables from the OS or a .env file.
 %% It uses Erlang ETS to store a cache, the goal is to avoid IO operations as much as possible.
--module(env).
+-module(erl_utils_env).
 
 -export([get_var/1, start/0]).
 

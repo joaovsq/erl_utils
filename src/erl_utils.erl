@@ -1,4 +1,4 @@
--module(utils).
+-module(erl_utils).
 
 -export([
     datetime_to_timestamp/1,

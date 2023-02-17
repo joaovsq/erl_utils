@@ -1,4 +1,4 @@
--module(file_utils).
+-module(erl_utils_file).
 
 -export([read_all/1, read_raw/1]).
 
