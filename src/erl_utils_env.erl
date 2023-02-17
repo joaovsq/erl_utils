@@ -20,20 +20,11 @@ start() ->
         ]
     ).
 
-get_from_ets(TableName, Key) ->
-    Result = ets:lookup(TableName, Key),
-    case Result of
-        [] ->
-            empty;
-        _ ->
-            {Key, Value} = lists:nth(1, Result),
-            Value
-    end.
-
 %% Tries to get a env variable in this order:
 %% 1. In memory Cache.
 %% 2. OS Environment Variables.
 %% 3. A .env file in the local directory.
+-spec get_var(atom()) -> unicode:chardata().
 get_var(Var) when is_atom(Var) ->
     CacheResult = get_from_ets(?MODULE, Var),
     case CacheResult of
@@ -45,6 +36,18 @@ get_var(Var) when is_atom(Var) ->
             CacheResult
     end.
 
+-spec get_from_ets(atom(), atom()) -> unicode:chardata().
+get_from_ets(TableName, Key) ->
+    Result = ets:lookup(TableName, Key),
+    case Result of
+        [] ->
+            empty;
+        _ ->
+            {Key, Value} = lists:nth(1, Result),
+            Value
+    end.
+
+-spec var_from_env(atom() | unicode:chardata()) -> unicode:chardata().
 var_from_env(Var) when is_atom(Var) ->
     StrVar = string:uppercase(atom_to_list(Var)),
     var_from_env(StrVar);
@@ -53,10 +56,11 @@ var_from_env(Var) ->
     case EnvVar of
         false ->
             Lines = erl_utils_file:read_all(".env"),
+            LinesWithoutComments = remove_comments(Lines),
             VarMap = lists:foldl(
                 fun get_key_value/2,
                 maps:new(),
-                Lines
+                LinesWithoutComments
             ),
 
             case maps:find(Var, VarMap) of
@@ -68,7 +72,8 @@ var_from_env(Var) ->
     end.
 
 %% Finds the key and value from a .env Entry and puts the result in a given map.
-get_key_value(Entry, VarMap) when Entry =:= "\n" ->
+-spec get_key_value(String :: unicode:chardata(), map()) -> map().
+get_key_value(Entry, VarMap) when Entry =:= "\n" orelse Entry =:= [] ->
     VarMap;
 get_key_value(Entry, VarMap) ->
     KeyValue = string:split(string:chomp(Entry), "="),
@@ -77,3 +82,7 @@ get_key_value(Entry, VarMap) ->
         lists:nth(2, KeyValue),
         VarMap
     ).
+
+-spec remove_comments([unicode:chardata()]) -> [unicode:chardata()].
+remove_comments(Lines) ->
+    lists:map(fun(Line) -> lists:nth(1, string:split(Line, "#")) end, Lines).
