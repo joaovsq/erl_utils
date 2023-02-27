@@ -12,7 +12,8 @@
     int_to_string/1,
     string_to_float/1,
     emptyloop/1,
-    reinit_mnesia_cluster/0
+    reinit_mnesia_cluster/0,
+    print_func_body/1
 ]).
 
 -export([bin_to_hex/1]).
@@ -144,3 +145,11 @@ reinit_mnesia_cluster() ->
     mnesia:delete_schema(AllNodes),
     mnesia:create_schema(AllNodes),
     rpc:multicall(mnesia, start, []).
+
+%% @doc Prints the function as string in the console
+-spec print_func_body(function()) -> iodata().
+print_func_body(Func) ->
+    {_Item, [{_, _, _, _, _, FuncBody}]} = erlang:fun_info(Func, env),
+    Raw = erl_pp:expr({'fun', 1, {clauses, FuncBody}}),
+    io:format([Raw | "\n"]),
+    Raw.
